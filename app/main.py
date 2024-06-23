@@ -9,8 +9,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 
 from app import models
-from app.auth import auth, utils
-from app.auth import schemas
+from app.auth import auth, utils, schemas
 from app.database import get_db, init_db
 
 
@@ -23,12 +22,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
-    CORSMiddleware ,
+    CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 class Item(BaseModel):
     id: Optional[int] = None
@@ -70,3 +70,33 @@ def login_for_access_token(
 @app.get("/users/me/", response_model=schemas.User)
 def read_users_me(current_user: schemas.User = Depends(auth.get_current_user)):
     return current_user
+
+
+@app.delete("/users/me", response_model=schemas.User)
+def delete_user(
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = auth.get_user(db, email=current_user.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db.delete(user)
+    db.commit()
+    return user
+
+
+@app.put("/users/me/password", response_model=schemas.User)
+def change_password(
+    password_change: schemas.PasswordChange,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = auth.get_user(db, email=current_user.email)
+    if not user or not utils.verify_password(
+        password_change.old_password, user.hashed_password
+    ):
+        raise HTTPException(status_code=400, detail="Incorrect password")
+    user.hashed_password = utils.get_password_hash(password_change.new_password)
+    db.commit()
+    db.refresh(user)
+    return user

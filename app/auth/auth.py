@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 
 from app import database, models
-from app.auth import utils
+from app.auth import schemas, utils
 
 import os
 
