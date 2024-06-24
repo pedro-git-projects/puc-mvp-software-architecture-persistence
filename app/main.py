@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 from contextlib import asynccontextmanager
 
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.auth import auth, utils, schemas
 from app.database import get_db, init_db
+from app.favorites.schemas import Favorite, FavoriteCreate
 
 
 @asynccontextmanager
@@ -100,3 +101,34 @@ def change_password(
     db.commit()
     db.refresh(user)
     return user
+
+
+@app.post("/users/me/favorites", response_model=Favorite)
+def add_favorite(
+    favorite: FavoriteCreate,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    db_favorite = models.Favorite(
+        user_id=current_user.id,
+        album_id=favorite.album_id,
+        album_name=favorite.album_name,
+        artist_name=favorite.artist_name,
+        cover_art_url=favorite.cover_art_url,
+    )
+    db.add(db_favorite)
+    db.commit()
+    db.refresh(db_favorite)
+    return db_favorite
+
+
+@app.get("/users/me/favorites", response_model=List[Favorite])
+def get_favorites(
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(models.Favorite)
+        .filter(models.Favorite.user_id == current_user.id)
+        .all()
+    )
