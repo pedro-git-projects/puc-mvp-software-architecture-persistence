@@ -116,12 +116,18 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
 
 - "A interface do usuário deve fazer chamadas a pelo menos 5 rotas diferentes."
 
-| Rota                        | Método  | Propósito                                 |
-|-----------------------------|---------|-------------------------------------------|
-| `/token`                    | POST    | Obter o token de autenticação para login. |
-| `/users/`                   | POST    | Criar um novo usuário.                    |
-| `/users/me`                 | DELETE  | Deletar a conta do usuário logado.        |
-| `/users/me/`                | GET     | Obter o perfil do usuário logado.         |
+| Rota                                    | Método  | Propósito                                                      |
+|-----------------------------------------|---------|----------------------------------------------------------------|
+| `/token`                                | POST    | Obter o token de autenticação para login.                      |
+| `/users/`                               | POST    | Criar um novo usuário.                                         |
+| `/users/me`                             | DELETE  | Deletar a conta do usuário logado.                             |
+| `/users/me/`                            | GET     | Obter o perfil do usuário logado.                              |
+| `/users/me/password`                    | PUT     | Alterar a senha do usuário logado.                             |
+| `/users/me/favorites`                   | POST    | Adicionar um item aos favoritos do usuário logado.             |
+| `/users/me/favorites`                   | GET     | Obter a lista de favoritos do usuário logado.                  |
+| `/users/me/favorites/{album_id}`        | DELETE  | Remover um item dos favoritos do usuário logado pelo ID do álbum. |
+
+As rotas e métodos adicionados refletem operações de alteração de senha, adição e remoção de favoritos, além de recuperar a lista de favoritos do usuário logado. Essas funcionalidades foram identificadas a partir das funções de API que você forneceu no código Python.
 
 - "Será permitido a utilização de bibliotecas ou frameworks baseadas em Python, como o FastAPI, SQLAlchemy, e outras"
 
@@ -139,5 +145,4 @@ Foram utilizadas duas APIs públicas, **Music Brainz** e **Cover Art Archive**, 
 
 ## Vídeo
 
-Para a conveniência dos professores uma demonstração em vídeo foi colocada no [YouTube](https://youtu.be/HKRCr_5HPz4)
-
+Para a conveniência dos professores uma demonstração em vídeo foi colocada no [YouTube]( https://youtu.be/KvMT9ThhVQQ )
