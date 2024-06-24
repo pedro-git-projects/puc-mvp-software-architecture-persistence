@@ -132,3 +132,21 @@ def get_favorites(
         .filter(models.Favorite.user_id == current_user.id)
         .all()
     )
+
+
+@app.delete("/users/me/favorites/{album_id}", response_model=Favorite)
+def delete_favorite(
+    album_id: str,
+    current_user: schemas.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    db_favorite = (
+        db.query(models.Favorite)
+        .filter_by(user_id=current_user.id, album_id=album_id)
+        .first()
+    )
+    if not db_favorite:
+        raise HTTPException(status_code=404, detail="Favorite not found")
+    db.delete(db_favorite)
+    db.commit()
+    return db_favorite
